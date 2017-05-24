@@ -1,6 +1,5 @@
 @Library('pipelib@master') _
 
-def THREADFIX_ID = env.THREADFIX_ID ? env.THREADFIX_ID : '115'
 
 node {
   def mvn = tool 'M3'
@@ -8,32 +7,18 @@ node {
 
   stage('Setup') {
     git([
-      url: env.GIT_URL ? env.GIT_URL : 'https://github.com/venicegeo/pz-servicecontroller',
+      url: env.GIT_URL ? env.GIT_URL : 'https://github.com/venicegeo/dg-pz-servicecontroller',
       branch: "master"
     ])
   }
 
   stage('Archive') {
     sh """
-      ${mvn}/bin/mvn clean package -U -Dmaven.repo.local=${root}
+      ${mvn}/bin/mvn clean package -U 
+      cp target/pz-jobcommon-LATEST.jar ${root}/pz-jobcommon-LATEST.jar
+      ${mvn}/bin/mvn clean package -U 
       cp target/piazzaServiceController-1.0.0.jar ${root}/pz-servicecontroller.jar
     """
-    mavenPush()
-  }
-
-  stage('Scans') {
-    dependencyCheck {
-      threadfixId = THREADFIX_ID
-    }
-    ionConnect()
-    sh """
-      mkdir -p ${root}/.m2/repository
-      ${mvn}/bin/mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install \
-        -Dmaven.repo.local=${root}/.m2/repository \
-        -Pcoverage-per-test org.jacoco:jacoco-maven-plugin:report \
-        -DdataFile=target/jacoco.exec
-    """
-    sonar()
   }
 
   stage('CI Deploy') {
@@ -53,30 +38,22 @@ node {
 
   stage('Reset') {
     git([
-      url: env.GIT_URL ? env.GIT_URL : 'https://github.com/venicegeo/pz-servicecontroller',
+      url: env.GIT_URL ? env.GIT_URL : 'https://github.com/venicegeo/dg-pz-servicecontroller',
       branch: "master"
     ])
   }
 
   stage('Staging Deploy') {
     cfPush {
-      cfDomain  = 'stage.geointservices.io'
+      cfDomain  = 'coastline.dg-cf-test.net'
       cfSpace   = 'stage'
     }
     cfBgDeploy {
-      cfDomain  = 'stage.geointservices.io'
+      cfDomain  = 'coastline.dg-cf-test.net'
       cfSpace   = 'stage'
     }
   }
 
-  stage('Final Scans') {
-    sh """
-      ${mvn}/bin/mvn install:install-file -Dmaven.repo.local=${root} -Dfile=pom.xml -DpomFile=pom.xml
-    """
-    fortify {
-      threadfixId = THREADFIX_ID
-    }
-  }
 
   stage('Cleanup') {
     deleteDir()
