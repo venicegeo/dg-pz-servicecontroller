@@ -26,9 +26,6 @@ node {
       cp target/piazzaServiceController-1.0.0.jar ${root}/pz-servicecontroller.jar
     """
     cfPush()
-    zap {
-      threadfixId = THREADFIX_ID
-    }
     cfBgDeploy()
   }
 
