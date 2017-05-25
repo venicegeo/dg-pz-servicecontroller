@@ -17,7 +17,7 @@ node {
       branch: "master"
     ])
     sh """
-      ${mvn}/bin/mvn install -U
+      ${mvn}/bin/mvn clean install -U
     """
   }
   stage('Archive') {
@@ -26,7 +26,7 @@ node {
       branch: "master"
     ])
     sh """
-      ${mvn}/bin/mvn clean package -U 
+      ${mvn}/bin/mvn package -U 
       cp target/piazzaServiceController-1.0.0.jar ${root}/pz-servicecontroller.jar
     """
   }
