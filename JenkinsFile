@@ -11,11 +11,21 @@ node {
       branch: "master"
     ])
   }
-
-  stage('Archive') {
+ stage('Build/Install Job Common') {
+    git([
+      url: env.GIT_URL ? env.GIT_URL : 'https://github.com/venicegeo/dg-pz-jobcommon',
+      branch: "master"
+    ])
     sh """
-      ${mvn}/bin/mvn clean package -U 
-      cp target/pz-jobcommon-LATEST.jar ${root}/pz-jobcommon-LATEST.jar
+      ${mvn}/bin/mvn install -U
+    """
+  }
+  stage('Archive') {
+    git([
+      url: env.GIT_URL ? env.GIT_URL : 'https://github.com/venicegeo/dg-pz-servicecontroller',
+      branch: "master"
+    ])
+    sh """
       ${mvn}/bin/mvn clean package -U 
       cp target/piazzaServiceController-1.0.0.jar ${root}/pz-servicecontroller.jar
     """

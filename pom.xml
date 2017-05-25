@@ -187,12 +187,12 @@
 		</plugins>
 	</build>
 
-	<repositories>
+	<!--	<repositories>
 		<repository>
 			<id>coastline-s3-nexus-replacement</id>
 			<url>s3://coastline-s3-nexus-replacement/content/repositories/</url> 
 		</repository>
-	</repositories>
+	</repositories> -->
 
 	<profiles>
 		<profile>
