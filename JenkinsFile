@@ -5,16 +5,15 @@ node {
   def mvn = tool 'M3'
   def root = pwd()
 
-  }
  stage('Build/Install Job Common') {
     git([
       url: env.GIT_URL ? env.GIT_URL : 'https://github.com/venicegeo/dg-pz-jobcommon',
       branch: "master"
     ])
     sh """
-      ${mvn}/bin/mvn clean install -U
+      ${mvn}/bin/mvn install -U 
     """
-  }
+  } 
 
   stage('Archive') {
     git([
@@ -22,26 +21,25 @@ node {
       branch: "master"
     ])
     sh """
-      ${mvn}/bin/mvn package -U 
-      cp target/piazzaServiceController-1.0.0.jar ${root}/pz-servicecontroller.jar
+      ${mvn}/bin/mvn clean package -U 
+      cp target/piazza-servicecontroller-1.0.0.jar ${root}/pz-servicecontroller.jar
     """
   }
 
   stage('CI Deploy') {
     sh """
-      cp target/piazzaServiceController-1.0.0.jar ${root}/pz-servicecontroller.jar
+      cp target/piazza-servicecontroller-1.0.0.jar ${root}/pz-servicecontroller.jar
     """
-    cfPush()
     cfBgDeploy()
   }
 
   stage('Integration Testing') {
     postman()
   }
-
+   
   stage('Reset') {
     git([
-      url: env.GIT_URL ? env.GIT_URL : 'https://github.com/venicegeo/dg-pz-servicecontroller',
+      url: env.GIT_URL ? env.GIT_URL : 'https://github.com/venicegeo/pz-servicecontroller',
       branch: "master"
     ])
   }
@@ -56,7 +54,6 @@ node {
       cfSpace   = 'stage'
     }
   }
-
 
   stage('Cleanup') {
     deleteDir()
